@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/kuznyechik.yml"
+      - ".github/workflows/kuznyechik.yml"
       - "kuznyechik/**"
       - "Cargo.*"
   push:
@@ -29,53 +30,24 @@ jobs:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
       - run: cargo build --target ${{ matrix.target }}
-      - env:
+      - run: cargo build --target ${{ matrix.target }}
+        env:
           RUSTFLAGS: "-Dwarnings --cfg kuznyechik_force_soft"
-        run: cargo build --target ${{ matrix.target }}
+      - run: cargo build --target ${{ matrix.target }}
+        env:
+          RUSTFLAGS: "-Dwarnings --cfg kuznyechik_force_soft --cfg kuznyechik_compact_soft"
 
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
         working-directory: ${{ github.workflow }}
-
-  sse2:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - 1.65.0 # MSRV
-          - stable
-        target:
-          - i686-unknown-linux-gnu
-          - x86_64-unknown-linux-gnu
-        include:
-          - target: i686-unknown-linux-gnu
-            deps: sudo apt update && sudo apt install gcc-multilib
-    steps:
-      - uses: actions/checkout@v3
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.rust }}
-          targets: ${{ matrix.target }}
-      - run: ${{ matrix.deps }}
-      - env:
-          RUSTFLAGS: "-Dwarnings -C target-feature=+sse2"
-        run: |
-          cargo test --target ${{ matrix.target }}
-          cargo test --target ${{ matrix.target }} --all-features
-      - env:
-          RUSTFLAGS: "-Dwarnings -C target-feature=+sse2 --cfg kuznyechik_force_soft"
-        run: |
-          cargo test --target ${{ matrix.target }}
-          cargo test --target ${{ matrix.target }} --all-features
 
   test:
     runs-on: ubuntu-latest
@@ -85,7 +57,7 @@ jobs:
           - 1.65.0 # MSRV
           - stable
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -95,6 +67,11 @@ jobs:
           cargo test --all-features
       - env:
           RUSTFLAGS: "-Dwarnings --cfg kuznyechik_force_soft"
+        run: |
+          cargo test
+          cargo test --all-features
+      - env:
+          RUSTFLAGS: "-Dwarnings --cfg kuznyechik_force_soft --cfg kuznyechik_compact_soft"
         run: |
           cargo test
           cargo test --all-features

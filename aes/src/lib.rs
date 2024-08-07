@@ -101,7 +101,7 @@
 //!
 //! - `aes_force_soft`: force software implementation.
 //! - `aes_compact`: reduce code size at the cost of slower performance
-//! (affects only software backend).
+//!   (affects only software backend).
 //!
 //! It can be enabled using `RUSTFLAGS` environmental variable
 //! (e.g. `RUSTFLAGS="--cfg aes_compact"`) or by modifying `.cargo/config`.
@@ -123,6 +123,8 @@
 #[cfg_attr(docsrs, doc(cfg(feature = "hazmat")))]
 pub mod hazmat;
 
+#[macro_use]
+mod macros;
 mod soft;
 
 use cfg_if::cfg_if;
